@@ -1,6 +1,6 @@
 # Data
 
-Place your Waldo task EyeLink `.txt` files here in a subfolder, e.g.:
+Place the data task task EyeLink `.txt` files here in a subfolder, e.g.:
 
 ```
 data/
