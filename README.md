@@ -74,10 +74,17 @@ form temporally coherent states.
 |------|------|
 | **Josef Krivan** | Original algorithm implementation (I-VT, I-AVT, I-DT) and initial analysis pipeline |
 | **Charles Orioma** | Extended and advanced the analysis pipeline, additional visualizations and metrics |
-| **Shailendra Bhandari** | Supervision, code review, K-ratio formula verification, effective velocity correction (SavGol smoothing, removal of incorrect `abs()`), Markov adequacy diagnostics (editor suggestion), package architecture and public release |
+| **Rujeena Mathema** | Data collection, dataset preparation and curation |
+| **Pedro Lencastre** | Scientific supervision and theoretical guidance |
+| **Pedro G. Lind** | Scientific supervision and theoretical guidance |
+| **Alexander Szorkovszky** | Scientific supervision, theoretical guidance, and assisted in implementation review |
+| **Shailendra Bhandari** | Supervised the project, reviewed the implementation , added Markov diagnostics, and led the public release |
 
 Josef Krivan initiated the codebase and Charles Orioma extended it.  
-Shailendra Bhandari supervised the work, verified the implementation against the paper equations, and added the Markov analysis and I-AVT corrections prior to public release.
+Rujeena Mathema prepared and curated the dataset.  
+Pedro Lencastre, Pedro G. Lind, Alexander Szorkovszky, and Shailendra Bhandari supervised the research.  
+Shailendra Bhandari and Alexander Szorkovszky supervised the implementation, 
+verified all formulas against the paper, and coordinated the public release.
 
 For questions about the code package contact: shailendra.bhandari@oslomet.no
 
