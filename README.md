@@ -69,17 +69,7 @@ form temporally coherent states.
 ---
 ## Contributors
 
-| Name | Role |
-|------|------|
-| **Josef Krivan** | Original algorithm implementation (I-VT, I-AVT, I-DT) and initial analysis pipeline |
-| **Charles Orioma** | Extended and advanced the analysis pipeline, additional visualizations and metrics |
-| **Rujeena Mathema** | Data collection, dataset preparation and curation |
-| **Pedro Lencastre** | Scientific supervision and theoretical guidance |
-| **Pedro G. Lind** | Scientific supervision and theoretical guidance |
-| **Alexander Szorkovszky** | Scientific supervision, theoretical guidance, and assisted in implementation review |
-| **Shailendra Bhandari** | Supervised the project, reviewed the implementation , added Markov diagnostics, and led the public release |
-
-Josef Krivan initiated the codebase and Charles Orioma extended it.  
+Josef Krivan initiated the codebase (project) and Charles Orioma extended it.  
 Rujeena Mathema prepared and curated the dataset.  
 Pedro Lencastre, Pedro G. Lind, Alexander Szorkovszky, and Shailendra Bhandari supervised the research.  
 Shailendra Bhandari and Alexander Szorkovszky supervised the implementation, 
@@ -89,4 +79,5 @@ For questions about the code package contact: shailendra.bhandari@oslomet.no
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](https://github.com/shailendrabhandari/adaptive-threshold-eyetracking/blob/main/LICENSE).
+
