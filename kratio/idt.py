@@ -1,36 +1,16 @@
 """
 idt.py
 ------
-Dispersion-Threshold Identification (I-DT) with K-ratio optimization.
+Dispersion-threshold identification (I-DT) with K-ratio optimization.
 I-DT identifies fixations as windows where spatial dispersion stays below
-a threshold for at least Tmin ms (50 ms default = 50 samples at 1000 Hz).
+a threshold for at least Tmin ms.
 """
-
 import numpy as np
 from .kratio import compute_k_ratio_numeric
-
-
 # I-DT Classifier
 
 def apply_idt(x_vals, y_vals, timestamps,
               x_threshold=25, y_threshold=25, dur_threshold=0.150):
-    """
-    Apply I-DT classification using a growing-window algorithm.
-
-    Parameters
-    ----------
-    x_vals, y_vals : array-like
-    timestamps : array-like
-        Time in seconds (or ms — consistent with dur_threshold units).
-    x_threshold, y_threshold : float
-        Spatial dispersion thresholds in pixels.
-    dur_threshold : float
-        Minimum fixation duration (same units as timestamps).
-
-    Returns
-    -------
-    dict with keys: x_fix, y_fix, x_sac, y_sac, classifier
-    """
     x_fix, y_fix = [], []
     x_sac, y_sac = [], []
     classifier   = []
@@ -84,25 +64,8 @@ def apply_idt(x_vals, y_vals, timestamps,
             'classifier': classifier}
 
 
-# ========================
-# I-DT Dispersion Series (sliding window)
-# ========================
-
+# I-DT dispersion series 
 def compute_dispersion_series(x_vals, y_vals, window_size=10):
-    """
-    Compute dispersion over a sliding window.
-
-    Dispersion = (max_x - min_x) + (max_y - min_y) within each window.
-
-    Parameters
-    ----------
-    x_vals, y_vals : np.ndarray
-    window_size : int
-
-    Returns
-    -------
-    np.ndarray of length len(x_vals) - window_size
-    """
     n = len(x_vals)
     if n <= window_size:
         return np.array([])
@@ -114,36 +77,12 @@ def compute_dispersion_series(x_vals, y_vals, window_size=10):
     return disp
 
 
-# ========================
-# I-DT K-ratio Optimization
-# ========================
-
 def optimize_idt_threshold(x_vals, y_vals,
                             window_size=10,
                             fixed_duration_samples=50,
                             num_thresholds=50,
                             pct_low=1, pct_high=98):
-    """
-    Find the I-DT dispersion threshold that minimizes the K-ratio.
 
-    Parameters
-    ----------
-    x_vals, y_vals : np.ndarray
-    window_size : int
-        Sliding window length in samples (default 10).
-    fixed_duration_samples : int
-        Minimum window run-length to label as fixation (default 50 windows
-        ≈ 50 ms at 1000 Hz with window_size=1).
-    num_thresholds : int
-    pct_low, pct_high : float
-
-    Returns
-    -------
-    thresholds : np.ndarray
-    k_ratios : np.ndarray
-    optimal_threshold : float
-    min_idx : int
-    """
     disp_values = compute_dispersion_series(x_vals, y_vals, window_size)
     if len(disp_values) < 5:
         return None, None, np.nan, -1
@@ -196,26 +135,8 @@ def optimize_idt_threshold(x_vals, y_vals,
     return thresholds, k_ratios, float(thresholds[min_idx]), min_idx
 
 
-# ========================
-# I-DT Grid Search (optimal dur_threshold)
-# ========================
-
 def grid_search_idt(x_vals, y_vals, timestamps,
                     xy_thresholds=None, dur_thresholds=None):
-    """
-    Grid search over spatial dispersion and duration thresholds.
-
-    Parameters
-    ----------
-    x_vals, y_vals, timestamps : np.ndarray
-    xy_thresholds : np.ndarray, optional
-    dur_thresholds : np.ndarray, optional
-
-    Returns
-    -------
-    best_params : dict with 'x_y_threshold' and 'dur_threshold'
-    best_k_ratio : float
-    """
     from .kratio import compute_k_ratio
 
     if xy_thresholds is None:
