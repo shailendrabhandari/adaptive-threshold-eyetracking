@@ -2,9 +2,6 @@
 preprocessing.py
 ----------------
 Data loading and preprocessing for EyeLink Waldo task recordings.
-
-Reference:
-    Orioma et al. / Bhandari et al. (2026)
 """
 
 import os
@@ -12,25 +9,8 @@ import numpy as np
 import pandas as pd
 
 
-# ========================
 # Data Loading
-# ========================
-
 def load_waldo_directory(directory, max_files=15):
-    """
-    Load EyeLink .txt files from a directory.
-
-    Parameters
-    ----------
-    directory : str
-        Path to folder containing .txt EyeLink files.
-    max_files : int
-        Maximum number of files to load.
-
-    Returns
-    -------
-    list of pd.DataFrame
-    """
     all_data = []
     file_count = 0
 
@@ -56,25 +36,10 @@ def load_waldo_directory(directory, max_files=15):
     return all_data
 
 
-# ========================
-# NaN Cleaning (500-sample margin)
-# ========================
+# NaN cleaning (250-sample margin)
 
-def _nan_mask_with_margin(xl, yl, xr, yr, margin=500):
-    """
-    Build a boolean mask that removes samples near NaN runs in either eye.
-    Uses forward and backward constraint loops (original algorithm).
 
-    Parameters
-    ----------
-    xl, yl, xr, yr : np.ndarray
-    margin : int
-        Number of samples to remove around each NaN run.
-
-    Returns
-    -------
-    np.ndarray of bool
-    """
+def _nan_mask_with_margin(xl, yl, xr, yr, margin=250):
     Nan_array = (
         np.logical_not(np.isnan(xl)) &
         np.logical_not(np.isnan(yl)) &
@@ -92,30 +57,10 @@ def _nan_mask_with_margin(xl, yl, xr, yr, margin=500):
     return new_nan_array
 
 
-# ========================
-# Preprocessing Pipeline
-# ========================
+# Preprocessing pipeline
 
-def preprocess_waldo(all_data, remove_nanbefore=500):
-    """
-    Extract, filter, and concatenate all participant data.
 
-    Parameters
-    ----------
-    all_data : list of pd.DataFrame
-        Output of load_waldo_directory().
-    remove_nanbefore : int
-        NaN margin parameter.
-
-    Returns
-    -------
-    dict with keys:
-        filtered_x_left, filtered_y_left,
-        filtered_x_right, filtered_y_right,
-        filtered_time,
-        filtered_category_left, filtered_category_right,
-        filtered_saccade, filtered_fixation
-    """
+def preprocess_waldo(all_data, remove_nanbefore=250):
     time_list = []
     x_left_list, y_left_list = [], []
     x_right_list, y_right_list = [], []
@@ -169,19 +114,9 @@ def preprocess_waldo(all_data, remove_nanbefore=500):
         filtered_fixation=filtered_fixation,
     )
 
-
-# ========================
-# Velocity and Angle Computations (Left Eye)
-# ========================
+# Velocity and angle computations
 
 def compute_velocity(filtered_x_left, filtered_y_left, filtered_time):
-    """
-    Compute instantaneous pixel velocity (I-VT feature).
-
-    Returns
-    -------
-    point_velo : np.ndarray  (N-1,)
-    """
     dx = np.diff(filtered_x_left)
     dy = np.diff(filtered_y_left)
     dt = np.diff(filtered_time)
@@ -192,20 +127,6 @@ def compute_velocity(filtered_x_left, filtered_y_left, filtered_time):
 
 
 def compute_effective_velocity(filtered_x_left, filtered_y_left, filtered_time):
-    """
-    Compute effective angular velocity (I-AVT feature).
-
-    Effective velocity = |v_i * cos(theta_i)| where theta_i is the angle
-    between consecutive displacement vectors (directional persistence).
-    Samples with zero-length steps are excluded.
-
-    Returns
-    -------
-    point_velo_eff : np.ndarray
-    x_val_corr : np.ndarray  (aligned positions)
-    y_val_corr : np.ndarray
-    valid_theta_indices : np.ndarray of bool
-    """
     dx = np.diff(filtered_x_left)
     dy = np.diff(filtered_y_left)
     dt = np.diff(filtered_time)
@@ -241,23 +162,8 @@ def compute_effective_velocity(filtered_x_left, filtered_y_left, filtered_time):
     return point_velo_eff, x_val_corr, y_val_corr, valid_theta_indices
 
 
-# ========================
-# Binocular coordination stats
-# ========================
 
 def binocular_coordination(data):
-    """
-    Compute Pearson correlation and event agreement between left and right eye.
-
-    Parameters
-    ----------
-    data : dict
-        Output of preprocess_waldo().
-
-    Returns
-    -------
-    dict with x_corr, y_corr, fix_agreement, sac_agreement
-    """
     xl = data['filtered_x_left'];  xr = data['filtered_x_right']
     yl = data['filtered_y_left'];  yr = data['filtered_y_right']
     cl = data['filtered_category_left']

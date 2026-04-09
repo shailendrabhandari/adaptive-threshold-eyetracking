@@ -6,37 +6,12 @@ Stationarity and first-order Markov adequacy diagnostics for the K-ratio framewo
 Implements the two checks from Appendix A of the paper:
   1. Blockwise K-ratio stability (transition probabilities across temporal blocks)
   2. T^k deviation: empirical k-step transition matrix vs. first-order Markov prediction
-
-Reference:
-    Orioma et al. / Bhandari et al. (2026), Appendix A and Fig. A1
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# ========================
-# Blockwise K-ratio stability
-# ========================
-
 def blockwise_kratio_stability(classifier, n_blocks=12):
-    """
-    Divide classifier sequence into temporal blocks and compute per-block:
-      - saccade fraction nS
-      - transition probabilities p(F->S) and p(S->F)
-      - K-ratio
-
-    Parameters
-    ----------
-    classifier : list or np.ndarray
-        Sequence of "fixation"/"saccade" strings, or 0/1 int array.
-    n_blocks : int
-
-    Returns
-    -------
-    dict with arrays: block_ns, block_pFS, block_pSF, block_kratio
-    """
-    # Convert to 0/1 if string
     if isinstance(classifier[0], str):
         labels = np.array([1 if c == "saccade" else 0 for c in classifier], dtype=int)
     else:
@@ -78,26 +53,9 @@ def blockwise_kratio_stability(classifier, n_blocks=12):
     )
 
 
-# ========================
 # First-order Markov T^k adequacy
-# ========================
 
 def markov_tk_deviation(classifier, max_lag=40):
-    """
-    Compare empirical k-step transition matrix to first-order Markov prediction T^k.
-
-    Returns the mean absolute deviation ||T_emp(k) - T^k||_1 for k=1..max_lag.
-
-    Parameters
-    ----------
-    classifier : list or np.ndarray
-    max_lag : int
-
-    Returns
-    -------
-    lags : np.ndarray  (1..max_lag)
-    deviations : np.ndarray
-    """
     if isinstance(classifier[0], str):
         labels = np.array([1 if c == "saccade" else 0 for c in classifier], dtype=int)
     else:
@@ -140,20 +98,6 @@ def markov_tk_deviation(classifier, max_lag=40):
 
 def plot_markov_diagnostics(classifier, n_blocks=12, max_lag=40,
                              save_path=None, title_suffix=""):
-    """
-    Reproduce Fig. A1 of the paper:
-      (a) Blockwise nS, p(F->S), p(S->F)
-      (b) Blockwise K-ratio stability
-      (c) First-order Markov adequacy: ||T_emp(k) - T^k||
-
-    Parameters
-    ----------
-    classifier : list
-    n_blocks : int
-    max_lag : int
-    save_path : str or None
-    title_suffix : str
-    """
     bw   = blockwise_kratio_stability(classifier, n_blocks=n_blocks)
     lags, devs = markov_tk_deviation(classifier, max_lag=max_lag)
 

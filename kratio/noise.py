@@ -2,9 +2,6 @@
 noise.py
 --------
 Gaussian noise injection and robustness sweep for I-VT, I-AVT, I-DT.
-
-Reference:
-    Orioma et al. / Bhandari et al. (2026), Section 2.1 and Fig. 4
 """
 
 import numpy as np
@@ -14,25 +11,9 @@ from .idt  import apply_idt,  optimize_idt_threshold, grid_search_idt
 from .preprocessing import compute_velocity, compute_effective_velocity
 
 
-# ========================
-# Gaussian Noise Injection
-# ========================
+
 
 def add_gaussian_noise(x_coords, y_coords, noise_level):
-    """
-    Add Gaussian noise to eye-tracking coordinates.
-
-    Parameters
-    ----------
-    x_coords, y_coords : np.ndarray
-    noise_level : float
-        Standard deviation sigma of the noise in pixels.
-        noise_level=0 returns unmodified copies.
-
-    Returns
-    -------
-    noisy_x, noisy_y : np.ndarray
-    """
     noisy_x = np.copy(x_coords)
     noisy_y = np.copy(y_coords)
     if noise_level > 0:
@@ -41,9 +22,7 @@ def add_gaussian_noise(x_coords, y_coords, noise_level):
     return noisy_x, noisy_y
 
 
-# ========================
-# Full Noise Sweep
-# ========================
+
 
 def run_noise_sweep(x_sample, y_sample, time_sample,
                     noise_levels=None,
@@ -52,32 +31,6 @@ def run_noise_sweep(x_sample, y_sample, time_sample,
                     num_thresholds_ivt=200,
                     num_thresholds_idt=50,
                     verbose=True):
-    """
-    Run adaptive threshold optimization across Gaussian noise levels
-    for all three algorithms (I-VT, I-AVT, I-DT).
-
-    Parameters
-    ----------
-    x_sample, y_sample, time_sample : np.ndarray
-        Subset of data to use for the sweep.
-    noise_levels : list of float
-        Sigma values for noise (default [0,1,2,5,10,30,40,50]).
-    idt_window_size : int
-    idt_fixed_duration_samples : int
-    num_thresholds_ivt : int
-    num_thresholds_idt : int
-    verbose : bool
-
-    Returns
-    -------
-    dict with keys:
-        noise_levels,
-        adaptive_ivt, adaptive_iavt, adaptive_idt,
-        ivt_fix_counts, ivt_sac_counts,
-        iavt_fix_counts, iavt_sac_counts,
-        idt_fix_counts, idt_sac_counts,
-        ivt_curves, iavt_curves, idt_curves
-    """
     if noise_levels is None:
         noise_levels = [0, 1, 2, 5, 10, 30, 40, 50]
 

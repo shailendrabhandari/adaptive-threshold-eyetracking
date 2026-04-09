@@ -2,20 +2,9 @@
 kratio.py
 ---------
 Core K-ratio metric for adaptive threshold optimization.
-
-Reference:
-    Orioma et al. / Bhandari et al. (2026)
-    "Identification of fixations and saccades in eye-tracking data
-     using adaptive threshold-based methods"
 """
 
 import numpy as np
-
-
-# ========================
-# K-ratio (string classifier version)
-# ========================
-
 def compute_k_ratio(classifier):
     """
     Compute K-ratio from a list/array of string labels.
@@ -29,12 +18,6 @@ def compute_k_ratio(classifier):
     -------
     float
         K-ratio value. Returns np.inf if degenerate.
-
-    Notes
-    -----
-    K-ratio = p_empirical(F->S) / p_independent(F->S)
-    where p_independent(F->S) = nS * (1 - nS)
-    and nS = fraction of saccade labels.
     """
     L = len(classifier)
     if L < 2:
@@ -56,10 +39,6 @@ def compute_k_ratio(classifier):
     p_ind = P * (1 - P)       # n_S * (1 - n_S)
     return p_emp / p_ind if p_ind != 0 else np.inf
 
-
-# ========================
-# K-ratio (numeric 0/1 version — faster for sweeps)
-# ========================
 
 def compute_k_ratio_numeric(labels01):
     """
@@ -90,30 +69,7 @@ def compute_k_ratio_numeric(labels01):
     return p_emp / p_ind if p_ind > 0 else np.inf
 
 
-# ========================
-# Sweep utility (shared by IVT, IAVT, IDT modules)
-# ========================
-
 def sweep_thresholds(feature, n_thresholds=200, pct_low=5, pct_high=96):
-    """
-    Sweep thresholds over a velocity/dispersion feature array and compute
-    K-ratio at each threshold. Returns (thresholds, k_ratios, optimal_threshold, min_idx).
-
-    Parameters
-    ----------
-    feature : np.ndarray
-        1D array of velocity or dispersion values.
-    n_thresholds : int
-    pct_low, pct_high : float
-        Percentile range for threshold grid.
-
-    Returns
-    -------
-    thresholds : np.ndarray
-    k_ratios : np.ndarray
-    optimal_threshold : float
-    min_idx : int
-    """
     feature = np.asarray(feature, dtype=float)
     finite = feature[np.isfinite(feature)]
     if finite.size < 10:
