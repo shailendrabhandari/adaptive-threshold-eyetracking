@@ -11,105 +11,109 @@ Implements the two checks from Appendix A of the paper:
 import numpy as np
 import matplotlib.pyplot as plt
 
-def blockwise_kratio_stability(classifier, n_blocks=12):
-    if isinstance(classifier[0], str):
-        labels = np.array([1 if c == "saccade" else 0 for c in classifier], dtype=int)
-    else:
-        labels = np.asarray(classifier, dtype=int)
 
-    L = len(labels)
+
+def _to_binary(classifier):
+    if isinstance(classifier[0], str):
+        return np.array([1 if c == "saccade" else 0
+                         for c in classifier], dtype=int)
+    arr = np.asarray(classifier, dtype=int)
+    # EyeLink labels: 1=fixation, 2=saccade -> remap to 0/1
+    if arr.max() > 1:
+        return (arr == 2).astype(int)
+    return arr
+
+
+
+def blockwise_kratio_stability(classifier, n_blocks=12):
+    labels = _to_binary(classifier)
+    L      = len(labels)
     block_size = L // n_blocks
 
-    block_ns     = []
-    block_pFS    = []
-    block_pSF    = []
-    block_kratio = []
+    block_ns, block_pFS, block_pSF, block_kratio = [], [], [], []
 
     for b in range(n_blocks):
         start = b * block_size
         end   = start + block_size if b < n_blocks - 1 else L
         blk   = labels[start:end]
-        if len(blk) < 2:
+        Lb    = len(blk)
+        if Lb < 2:
             continue
 
         nS = blk.mean()
         block_ns.append(nS)
 
         prev = blk[:-1];  nxt = blk[1:]
-        pFS = np.mean((prev == 0) & (nxt == 1))
-        pSF = np.mean((prev == 1) & (nxt == 0))
+
+        # Paper Eq. 10: use sum/L (not np.mean which divides by L-1)
+        pFS = np.sum((prev == 0) & (nxt == 1)) / Lb   # n_{F->S}
+        pSF = np.sum((prev == 1) & (nxt == 0)) / Lb   # n_{S->F}
         block_pFS.append(pFS)
         block_pSF.append(pSF)
 
         p_ind = nS * (1 - nS)
-        kr = (pFS / p_ind) if p_ind > 0 else np.nan
+        kr    = (pFS / p_ind) if p_ind > 0 else np.nan
         block_kratio.append(kr)
 
     return dict(
-        block_ns=np.array(block_ns),
-        block_pFS=np.array(block_pFS),
-        block_pSF=np.array(block_pSF),
-        block_kratio=np.array(block_kratio),
+        block_ns    = np.array(block_ns),
+        block_pFS   = np.array(block_pFS),
+        block_pSF   = np.array(block_pSF),
+        block_kratio= np.array(block_kratio),
     )
 
 
-# First-order Markov T^k adequacy
-
 def markov_tk_deviation(classifier, max_lag=40):
-    if isinstance(classifier[0], str):
-        labels = np.array([1 if c == "saccade" else 0 for c in classifier], dtype=int)
-    else:
-        labels = np.asarray(classifier, dtype=int)
+    labels = _to_binary(classifier)
 
-    # Empirical 1-step transition matrix T
-    T = np.zeros((2, 2), dtype=float)
+    # Empirical 1-step transition matrix T (row-stochastic)
+    T    = np.zeros((2, 2), dtype=float)
     prev = labels[:-1];  nxt = labels[1:]
     for s in range(2):
         mask = prev == s
         if mask.sum() > 0:
-            T[s, 0] = np.mean(nxt[mask] == 0)
-            T[s, 1] = np.mean(nxt[mask] == 1)
+            T[s, 0] = np.sum(nxt[mask] == 0) / mask.sum()
+            T[s, 1] = np.sum(nxt[mask] == 1) / mask.sum()
 
-    lags = np.arange(1, max_lag + 1)
+    lags       = np.arange(1, max_lag + 1)
     deviations = np.empty(max_lag, dtype=float)
 
     for i, k in enumerate(lags):
-        # Empirical k-step transitions
+        # Empirical k-step transition matrix
         T_emp_k = np.zeros((2, 2), dtype=float)
         if k < len(labels):
             prev_k = labels[:-k];  nxt_k = labels[k:]
             for s in range(2):
                 mask = prev_k == s
                 if mask.sum() > 0:
-                    T_emp_k[s, 0] = np.mean(nxt_k[mask] == 0)
-                    T_emp_k[s, 1] = np.mean(nxt_k[mask] == 1)
+                    T_emp_k[s, 0] = np.sum(nxt_k[mask] == 0) / mask.sum()
+                    T_emp_k[s, 1] = np.sum(nxt_k[mask] == 1) / mask.sum()
 
-        # First-order Markov prediction: T^k (matrix power)
-        T_pred_k = np.linalg.matrix_power(T, k)
-
+        # First-order Markov prediction: T^k
+        T_pred_k      = np.linalg.matrix_power(T, k)
         deviations[i] = np.mean(np.abs(T_emp_k - T_pred_k))
 
     return lags, deviations
 
 
-# ========================
-# Combined Markov Diagnostic Plot  (Fig. A1 style)
-# ========================
-
 def plot_markov_diagnostics(classifier, n_blocks=12, max_lag=40,
                              save_path=None, title_suffix=""):
-    bw   = blockwise_kratio_stability(classifier, n_blocks=n_blocks)
-    lags, devs = markov_tk_deviation(classifier, max_lag=max_lag)
+    bw          = blockwise_kratio_stability(classifier, n_blocks=n_blocks)
+    lags, devs  = markov_tk_deviation(classifier, max_lag=max_lag)
 
-    fig, axes = plt.subplots(3, 1, figsize=(8, 7))
+    fig, axes = plt.subplots(3, 1, figsize=(8, 4))
     block_idx = np.arange(len(bw['block_ns']))
 
     # ---- (a) Blockwise nS and transitions ----
-    ax1 = axes[0]
+    ax1  = axes[0]
     ax1r = ax1.twinx()
-    ax1.plot(block_idx, bw['block_ns'],   'g-o', linewidth=1.5, markersize=5, label=r'$n_S$')
-    ax1r.plot(block_idx, bw['block_pFS'], 'b-s', linewidth=1.5, markersize=5, label=r'$p(F\to S)$')
-    ax1r.plot(block_idx, bw['block_pSF'], 'r-^', linewidth=1.5, markersize=5, label=r'$p(S\to F)$')
+    ax1.plot(block_idx,  bw['block_ns'],
+             'b-o', linewidth=1.5, markersize=5, label=r'$n_S$')
+    ax1r.plot(block_idx, bw['block_pFS'],
+              color='orange', marker='o', linewidth=1.5, markersize=5,
+              label=r'$p(F\to S)$')
+    ax1r.plot(block_idx, bw['block_pSF'],
+              'g-s', linewidth=1.5, markersize=5, label=r'$p(S\to F)$')
     ax1.set_ylabel(r'$n_S$', fontsize=10, fontweight='bold')
     ax1r.set_ylabel('Transition prob.', fontsize=10, fontweight='bold')
     ax1.set_title(f'(a) Blockwise event fraction and transitions {title_suffix}',
@@ -122,7 +126,8 @@ def plot_markov_diagnostics(classifier, n_blocks=12, max_lag=40,
 
     # ---- (b) Blockwise K-ratio ----
     ax2 = axes[1]
-    ax2.plot(block_idx, bw['block_kratio'], 'b-o', linewidth=1.5, markersize=5)
+    ax2.plot(block_idx, bw['block_kratio'],
+             'b-o', linewidth=1.5, markersize=5)
     ax2.set_ylabel('K-ratio', fontsize=10, fontweight='bold')
     ax2.set_title('(b) Blockwise K-ratio stability', fontsize=10, fontweight='bold')
     ax2.grid(True, alpha=0.3)
@@ -145,10 +150,10 @@ def plot_markov_diagnostics(classifier, n_blocks=12, max_lag=40,
 
     plt.show()
 
-    # Print summary stats
-    print(f"\nBlockwise K-ratio: mean = {np.nanmean(bw['block_kratio']):.4f}, "
-          f"std = {np.nanstd(bw['block_kratio']):.4f}, "
-          f"range = [{np.nanmin(bw['block_kratio']):.4f}, {np.nanmax(bw['block_kratio']):.4f}]")
+    print(f"\nBlockwise K-ratio : mean={np.nanmean(bw['block_kratio']):.4f}  "
+          f"std={np.nanstd(bw['block_kratio']):.4f}  "
+          f"range=[{np.nanmin(bw['block_kratio']):.4f}, "
+          f"{np.nanmax(bw['block_kratio']):.4f}]")
     print(f"T^k deviation at k=2 : {devs[1]:.2e}")
     print(f"T^k deviation at k=5 : {devs[4]:.2e}")
 
