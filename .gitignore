@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+outputs/*.pdf
+outputs/*.png
+outputs/*.csv
+data/extracted_waldo/
+.DS_Store
