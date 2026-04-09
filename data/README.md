@@ -8,6 +8,10 @@ data/
     ├── participant_01.txt
     ├── participant_02.txt
     └── ...
+└──extracted_randomPixel/
+    ├── participant_01.txt
+    ├── participant_02.txt
+    └── ...
 ```
 
 Then set `DATA_DIR = "data/extracted_waldo"` in `example_waldo.ipynb`.
@@ -20,8 +24,7 @@ Each `.txt` file is a space-delimited EyeLink recording with 10 columns per samp
 |-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
 | timestamp | x_left | y_left | pupil_left | x_right | y_right | pupil_right | — | category_left | category_right |
 
-- `category`: 1 = fixation, 2 = saccade (EyeLink default parser labels)
-- Lines starting with `MSG` are skipped automatically.
+- `category`: 0= blink, 1 = fixation, 2 = saccade (EyeLink default parser labels)
 
 ## Dataset reference
 
