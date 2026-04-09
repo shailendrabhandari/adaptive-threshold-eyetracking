@@ -2,19 +2,12 @@
 ivt.py
 ------
 Velocity-Threshold Identification (I-VT) algorithm with K-ratio optimization.
-
-Reference:
-    Salvucci & Goldberg (2000); Orioma et al. / Bhandari et al. (2026)
 """
 
 import numpy as np
 from .kratio import sweep_thresholds
 
-
-# ========================
 # I-VT Classifier
-# ========================
-
 def apply_ivt(point_velo, x_vals, y_vals, threshold):
     """
     Apply I-VT classification: samples with velocity < threshold -> fixation.
@@ -54,28 +47,8 @@ def apply_ivt(point_velo, x_vals, y_vals, threshold):
             'classifier': classifier}
 
 
-# ========================
-# I-VT K-ratio Optimization
-# ========================
-
 def optimize_ivt_threshold(point_velo, num_thresholds=200,
                             pct_low=5, pct_high=96):
-    """
-    Find the I-VT threshold that minimizes the K-ratio.
-
-    Parameters
-    ----------
-    point_velo : np.ndarray
-    num_thresholds : int
-    pct_low, pct_high : float
-
-    Returns
-    -------
-    thresholds : np.ndarray
-    k_ratios : np.ndarray
-    optimal_threshold : float
-    min_idx : int
-    """
     thresholds, k_ratios, optimal_threshold, min_idx = sweep_thresholds(
         point_velo,
         n_thresholds=num_thresholds,
