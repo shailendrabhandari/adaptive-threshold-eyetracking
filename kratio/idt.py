@@ -2,21 +2,15 @@
 idt.py
 ------
 Dispersion-Threshold Identification (I-DT) with K-ratio optimization.
-
 I-DT identifies fixations as windows where spatial dispersion stays below
 a threshold for at least Tmin ms (50 ms default = 50 samples at 1000 Hz).
-
-Reference:
-    Salvucci & Goldberg (2000); Orioma et al. / Bhandari et al. (2026)
 """
 
 import numpy as np
 from .kratio import compute_k_ratio_numeric
 
 
-# ========================
 # I-DT Classifier
-# ========================
 
 def apply_idt(x_vals, y_vals, timestamps,
               x_threshold=25, y_threshold=25, dur_threshold=0.150):
