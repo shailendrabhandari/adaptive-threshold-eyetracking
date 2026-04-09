@@ -15,7 +15,6 @@ Implements three threshold-based fixation/saccade classifiers — **I-VT**, **I-
 
 - Gaussian noise robustness sweep 
 - Markov adequacy diagnostics
-- 
 Dataset: Random Pixel and Waldo (visual search) task — EyeLink 1000 Hz recordings.
 
 ---
