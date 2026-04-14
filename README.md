@@ -75,7 +75,7 @@ Pedro Lencastre, Pedro G. Lind, Alexander Szorkovszky, and Shailendra Bhandari s
 Shailendra Bhandari and Alexander Szorkovszky supervised the implementation, 
 verified all formulas against the paper, and coordinated the public release.
 
-For questions about the code package contact: shailendra.bhandari@oslomet.no
+For questions about the code package contact: shailendra.bhandari@oslomet.no 
 
 ## License
 
