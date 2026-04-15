@@ -1,6 +1,5 @@
 """
 preprocessing.py
-----------------
 Data loading and preprocessing for EyeLink Waldo task recordings.
 """
 
