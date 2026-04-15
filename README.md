@@ -21,6 +21,7 @@ Dataset: Random Pixel and Waldo (visual search) task — EyeLink 1000 Hz recordi
 
 
 ## Quick start
+**Reproducibility note:** Small variations may appear compared to the paper due to random number generation or slight differences in participant selection (15 files per task from a larger pool). The standalone notebooks `RP_standalone.ipynb` and `Waldo_standalone.ipynb` reproduce results that are very similar to those reported in the paper.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/kratio-eyetracking.git
