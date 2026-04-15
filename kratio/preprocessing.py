@@ -39,7 +39,7 @@ def load_waldo_directory(directory, max_files=15):
 # NaN cleaning (250-sample margin)
 
 
-def _nan_mask_with_margin(xl, yl, xr, yr, margin=250):
+def _nan_mask_with_margin(xl, yl, xr, yr, margin=500):
     Nan_array = (
         np.logical_not(np.isnan(xl)) &
         np.logical_not(np.isnan(yl)) &
@@ -60,7 +60,7 @@ def _nan_mask_with_margin(xl, yl, xr, yr, margin=250):
 # Preprocessing pipeline
 
 
-def preprocess_waldo(all_data, remove_nanbefore=250):
+def preprocess_waldo(all_data, remove_nanbefore=500):
     time_list = []
     x_left_list, y_left_list = [], []
     x_right_list, y_right_list = [], []

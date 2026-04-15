@@ -15,6 +15,8 @@ before computing V_eff, as stated in the paper, to reduce high-frequency
 fluctuations at 1000 Hz sampling rate.
 """
 import numpy as np
+from .kratio import sweep_thresholds
+from .preprocessing import compute_effective_velocity  
 from scipy.signal import savgol_filter
 from .kratio import sweep_thresholds
 
@@ -25,8 +27,6 @@ def smooth_coordinates(x, y, window_length=11, polyorder=2):
     x_smooth = savgol_filter(x, window_length=window_length, polyorder=polyorder)
     y_smooth = savgol_filter(y, window_length=window_length, polyorder=polyorder)
     return x_smooth, y_smooth
-
-
 # Effective angular velocity
 def compute_effective_velocity_iavt(x, y, t):
     dx = np.diff(x)
@@ -41,15 +41,13 @@ def compute_effective_velocity_iavt(x, y, t):
     ux = dx / norms
     uy = dy / norms
     cos_delta = ux[1:] * ux[:-1] + uy[1:] * uy[:-1]
-    cos_delta = np.clip(cos_delta, -1.0, 1.0)   # numerical safety
+    cos_delta = np.clip(cos_delta, -1.0, 1.0)  
     valid     = np.isfinite(cos_delta)
-    v_eff     = V[:-1][valid] * cos_delta[valid]  # paper Eq. 3, no abs
+    v_eff     = V[:-1][valid] * cos_delta[valid] 
     x_aligned = x[1:-1][valid]
     y_aligned = y[1:-1][valid]
 
     return v_eff, x_aligned, y_aligned
-
-
 # I-AVT Classifier
 
 def apply_iavt(point_velo_eff, x_vals, y_vals, threshold):
@@ -76,10 +74,7 @@ def apply_iavt(point_velo_eff, x_vals, y_vals, threshold):
             'x_sac': x_sac, 'y_sac': y_sac,
             'classifier': classifier}
 
-
-# I-AVT K-ratio optimization
-
-def optimize_iavt_threshold(point_velo_eff, num_thresholds=200,
+'''def optimize_iavt_threshold(point_velo_eff, num_thresholds=200,
                              pct_low=0, pct_high=96):
     finite = point_velo_eff[np.isfinite(point_velo_eff)]
     if finite.size < 10:
@@ -96,3 +91,7 @@ def optimize_iavt_threshold(point_velo_eff, num_thresholds=200,
 
     min_idx = int(np.nanargmin(k_ratios))
     return thresholds, k_ratios, float(thresholds[min_idx]), min_idx
+'''
+def optimize_iavt_threshold(point_velo_eff, num_thresholds=200, pct_low=0, pct_high=96):
+    # unchanged – now receives already non-smoothed velocity
+    return sweep_thresholds(point_velo_eff, num_thresholds, pct_low, pct_high)

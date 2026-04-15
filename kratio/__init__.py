@@ -22,8 +22,9 @@ from .preprocessing import (
 )
 from .kratio import compute_k_ratio, compute_k_ratio_numeric, sweep_thresholds
 from .ivt    import apply_ivt,  optimize_ivt_threshold
-from .iavt   import (apply_iavt, optimize_iavt_threshold,
-                     smooth_coordinates, compute_effective_velocity_iavt)
+#from .iavt   import (apply_iavt, optimize_iavt_threshold,
+#                     smooth_coordinates, compute_effective_velocity_iavt)
+from .iavt import apply_iavt, optimize_iavt_threshold
 from .idt    import apply_idt,  optimize_idt_threshold, grid_search_idt, compute_dispersion_series
 from .noise  import add_gaussian_noise, run_noise_sweep
 from .markov import (
